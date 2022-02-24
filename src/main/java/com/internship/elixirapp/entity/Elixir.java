@@ -38,7 +38,4 @@ public class Elixir {
     @ManyToMany(mappedBy = "elixirs", fetch = FetchType.LAZY)
     private List<User> users;
 
-    @ManyToMany(mappedBy = "availableElixirs", fetch = FetchType.LAZY)
-    private List<User> availableToUsers;
-
 }

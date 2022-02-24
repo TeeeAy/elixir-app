@@ -5,6 +5,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @NoArgsConstructor
@@ -40,6 +41,7 @@ public class User {
     )
     private List<Ingredient> ingredients;
 
+
     @ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
     @JoinTable(
             name = "User_elixirs",
@@ -48,14 +50,6 @@ public class User {
     )
     private List<Elixir> elixirs;
 
-
-    @ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "User_available_elixirs",
-            joinColumns = { @JoinColumn(name = "user_id") },
-            inverseJoinColumns = { @JoinColumn(name = "elixir_id") }
-    )
-    private List<Elixir> availableElixirs;
 
     public void addIngredient(Ingredient ingredient){
         ingredients.add(ingredient);

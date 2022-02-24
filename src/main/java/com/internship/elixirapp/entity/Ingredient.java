@@ -5,7 +5,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @NoArgsConstructor
@@ -14,6 +14,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Table(name = "Ingredient")
+@EqualsAndHashCode(of = {"id", "name", "type", "cost"})
 public class Ingredient {
 
     @Id
@@ -23,6 +24,7 @@ public class Ingredient {
 
     private String name;
 
+    @Enumerated(EnumType.STRING)
     private IngredientType type;
 
     private Integer cost;
@@ -33,16 +35,4 @@ public class Ingredient {
     @ManyToMany(mappedBy = "ingredients", fetch = FetchType.LAZY)
     private List<User> users;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Ingredient that = (Ingredient) o;
-        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && type == that.type && Objects.equals(cost, that.cost);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, type, cost);
-    }
 }
