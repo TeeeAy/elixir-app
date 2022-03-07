@@ -5,12 +5,13 @@ import com.internship.elixirapp.dto.IngredientFilterDto;
 import com.internship.elixirapp.entity.Ingredient;
 import com.internship.elixirapp.entity.User;
 import com.internship.elixirapp.repository.IngredientRepository;
-import com.internship.elixirapp.repository.UserRepository;
 import com.internship.elixirapp.security.service.AppUserDetailsService;
 import com.internship.elixirapp.transformer.IngredientTransformer;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,21 +28,41 @@ public class IngredientService {
 
     private static final String INGREDIENT_NOT_FOUND_MESSAGE = "Ingredient with id='%s' does not exist";
 
+    private static final String INGREDIENT_BOUGHT_SUCCESSFULLY_MESSAGE = "You have successfully bought ingredient %s";
+
+    private static final String INGREDIENT_SOLD_SUCCESSFULLY_MESSAGE = "You have successfully sold ingredient %s";
+
+    private static final String INGREDIENT_BOUGHT_UNSUCCESSFULLY_MESSAGE = "You don't have enough" +
+            " money to buy that ingredient";
+
+    private static final String INGREDIENT_SOLD_UNSUCCESSFULLY_MESSAGE = "You don't have that ingredient";
+
     private static final String DEFAULT_SORT = "name";
+
+    private UserService userService;
 
     private IngredientRepository ingredientRepository;
 
-    private UserRepository userRepository;
-
     private IngredientTransformer ingredientTransformer;
 
-    public boolean buyIngredient(String id) {
-        User user = AppUserDetailsService.getCurrentUser();
+    public ResponseEntity<String> buyIngredient(String id) {
+        String userId = AppUserDetailsService.getCurrentUser().getId();
+        User user = userService.getUserById(userId);
         Ingredient ingredient = getIngredientById(id);
-        if (user.getCoins() >= getIngredientById(id).getCost()) {
+        if (buyIngredient(user, ingredient)) {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(String.format(INGREDIENT_BOUGHT_SUCCESSFULLY_MESSAGE, ingredient.getName()));
+        }
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(INGREDIENT_BOUGHT_UNSUCCESSFULLY_MESSAGE);
+    }
+
+    private boolean buyIngredient(User user, Ingredient ingredient){
+        if (user.getCoins() >= ingredient.getCost()) {
             user.addIngredient(ingredient);
             user.setCoins(user.getCoins() - ingredient.getCost());
-            userRepository.save(user);
             return true;
         }
         return false;
@@ -59,16 +80,27 @@ public class IngredientService {
     }
 
 
-    public boolean sellIngredient(String id) {
-        User user = AppUserDetailsService.getCurrentUser();
-        Ingredient ingredient = getIngredientById(id);
+    private boolean sellIngredient(User user, Ingredient ingredient) {
         if (user.getIngredients().contains(ingredient)) {
             user.removeIngredient(ingredient);
             user.setCoins(user.getCoins() + ingredient.getCost());
-            userRepository.save(user);
             return true;
         }
         return false;
+    }
+
+    public ResponseEntity<String> sellIngredient(String id){
+        String userId = AppUserDetailsService.getCurrentUser().getId();
+        User user = userService.getUserById(userId);
+        Ingredient ingredient = getIngredientById(id);
+        if (sellIngredient(user, ingredient)) {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(String.format(INGREDIENT_SOLD_SUCCESSFULLY_MESSAGE, ingredient.getName()));
+        }
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(INGREDIENT_SOLD_UNSUCCESSFULLY_MESSAGE);
     }
 
     public Ingredient getIngredientById(String id) {

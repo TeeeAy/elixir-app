@@ -14,11 +14,14 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.internship.elixirapp.repository.specification.ElixirSpecification.buildSpecification;
 import static com.internship.elixirapp.repository.specification.ElixirSpecification.filterByIngredient;
+import static com.internship.elixirapp.util.RandomUtil.randomInt;
 import static java.util.Objects.nonNull;
 
 @Service
@@ -32,6 +35,8 @@ public class ElixirService {
 
     private final IngredientService ingredientService;
 
+    private UserService userService;
+
     private ElixirRepository elixirRepository;
 
     private ElixirTransformer elixirTransformer;
@@ -41,7 +46,8 @@ public class ElixirService {
         if (ingredientIds.length > MAX_RECIPE_SIZE || ingredientIds.length < MIN_RECIPE_SIZE) {
             throw new IllegalArgumentException("Wrong recipe size :(");
         }
-        User user = AppUserDetailsService.getCurrentUser();
+        String userId = AppUserDetailsService.getCurrentUser().getId();
+        User user = userService.getUserById(userId);
         List<Ingredient> ingredients = Arrays.stream(ingredientIds)
                 .map(ingredientService::getIngredientById)
                 .collect(Collectors.toList());
@@ -51,7 +57,7 @@ public class ElixirService {
         if (elixir == null) {
             throw new NoSuchElixirException("No elixir with such recipe :(");
         }
-        if (!user.getIngredients().containsAll(ingredients)) {
+        else if (!user.getIngredients().containsAll(ingredients)) {
             throw new IllegalArgumentException("You don’t have all needed ingredients :(");
         }
 
@@ -80,15 +86,14 @@ public class ElixirService {
     }
 
     private void createElixir(User user, List<Ingredient> ingredients, Elixir elixir) {
-        Random random = new Random();
         ingredients.forEach(
                 ingredient -> {
-                    if (random.nextInt(100) <= ingredient.getType().getConsumingProbability()) {
+                    if (randomInt(100) <= ingredient.getType().getConsumingProbability()) {
                         user.removeIngredient(ingredient);
                     }
                 }
         );
-        user.getElixirs().add(elixir);
+        user.addElixir(elixir);
     }
 
 

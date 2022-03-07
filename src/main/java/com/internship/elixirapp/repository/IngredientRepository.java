@@ -1,7 +1,6 @@
 package com.internship.elixirapp.repository;
 
 import com.internship.elixirapp.entity.Ingredient;
-import com.internship.elixirapp.entity.IngredientType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;

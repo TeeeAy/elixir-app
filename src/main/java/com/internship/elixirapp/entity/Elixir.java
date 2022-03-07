@@ -27,7 +27,7 @@ public class Elixir {
 
     private Integer level;
 
-    @ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
+    @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(
             name = "Recipe",
             joinColumns = { @JoinColumn(name = "elixir_id") },
@@ -35,7 +35,7 @@ public class Elixir {
     )
     private List<Ingredient> ingredients;
 
-    @ManyToMany(mappedBy = "elixirs", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "elixirs", cascade = CascadeType.ALL)
     private List<User> users;
 
 }

@@ -15,6 +15,8 @@ public class UserService {
 
     private static final String USER_NOT_FOUND_MESSAGE = "User with id='%s' does not exist";
 
+    private static final String USER_REGISTERED_MESSAGE = "User %s registered successfully";
+
     private UserRepository userRepository;
 
     private PasswordEncoder passwordEncoder;
@@ -31,7 +33,7 @@ public class UserService {
     }
 
 
-    public User registerNewUserAccount(UserDto userDto) throws UserAlreadyExistsException {
+    public String registerNewUserAccount(UserDto userDto) throws UserAlreadyExistsException {
         if (nameExists(userDto.getName())) {
             throw new UserAlreadyExistsException("There is an account with that username: "
                     + userDto.getName());
@@ -43,7 +45,8 @@ public class UserService {
                 .withPassword(passwordEncoder.encode(userDto.getPassword()))
                 .build();
 
-        return userRepository.save(user);
+        userRepository.save(user);
+        return String.format(USER_REGISTERED_MESSAGE, user.getName());
     }
 
     private boolean nameExists(String name) {
@@ -55,4 +58,5 @@ public class UserService {
                 () -> new UserNotFoundException(String.format(USER_NOT_FOUND_MESSAGE, id))
         );
     }
+
 }

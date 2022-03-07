@@ -1,7 +1,6 @@
 package com.internship.elixirapp.controller;
 
 import com.internship.elixirapp.dto.UserDto;
-import com.internship.elixirapp.entity.User;
 import com.internship.elixirapp.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +16,7 @@ public class UserRegistrationController {
     private UserService userService;
 
     @PostMapping("/user/registration")
-    public User registerUser(@Valid @RequestBody UserDto userDto) {
+    public String registerUser(@Valid @RequestBody UserDto userDto) {
        return userService.registerNewUserAccount(userDto);
     }
 

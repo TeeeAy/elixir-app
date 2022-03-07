@@ -2,10 +2,10 @@ package com.internship.elixirapp.entity;
 
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @NoArgsConstructor
@@ -33,18 +33,18 @@ public class User {
     @Builder.Default
     private Integer coins = START_COINS;
 
-    @ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
     @JoinTable(
-            name = "User_ingredients",
+            name = "user_ingredients",
             joinColumns = { @JoinColumn(name = "user_id") },
             inverseJoinColumns = { @JoinColumn(name = "ingredient_id") }
     )
     private List<Ingredient> ingredients;
 
 
-    @ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
+    @ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
     @JoinTable(
-            name = "User_elixirs",
+            name = "user_elixirs",
             joinColumns = { @JoinColumn(name = "user_id") },
             inverseJoinColumns = { @JoinColumn(name = "elixir_id") }
     )
@@ -57,6 +57,11 @@ public class User {
 
     public void removeIngredient(Ingredient ingredient){
         ingredients.remove(ingredient);
+    }
+
+    @Transactional
+    public void addElixir(Elixir elixir){
+        elixirs.add(elixir);
     }
 
 
